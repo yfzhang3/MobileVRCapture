@@ -1,6 +1,8 @@
 import cv2
 import mediapipe as mp
 import socket
+import matplotlib.pyplot as plt
+
 
 CAM_INDEX = 1
 
@@ -21,6 +23,14 @@ mp_drawing_styles = mp.solutions.drawing_styles
 # communication
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serverAddressPort = ("127.0.0.1", 5052) # 5052 random port that's unused
+# plot
+plt.autoscale(False)
+fig = plt.figure()
+ax = fig.add_subplot(projection='3d')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+
 
 def display_tracked_image(image, results):
     """Source: Google Media Pipe Github Examples."""
@@ -85,6 +95,19 @@ with mp_holistic.Holistic( static_image_mode = static_image_mode,
         display_tracked_image(frame, holistic_results)
 
         
+        # visualize landmarks
+        if holistic_results.pose_world_landmarks:
         
+            ax.clear()
+            ax.set_xlim([-1, 1])
+            ax.set_ylim([-1, 1])
+            ax.set_zlim([-1, 1])
+
+            for landmark in holistic_results.pose_world_landmarks.landmark:
+                ax.scatter(landmark.x, landmark.y, landmark.z)
+        
+            plt.pause(0.01)
+
+
 feed.release()
 
