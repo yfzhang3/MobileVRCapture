@@ -1,5 +1,6 @@
 import cv2
 import mediapipe as mp
+import matplotlib.pyplot as plt
 
 
 CAM_INDEX = 1
@@ -17,6 +18,15 @@ min_tracking_confidence = 0.5 # tracking confidence
 # media pipe tools
 mp_drawing, mp_holistic = mp.solutions.drawing_utils, mp.solutions.holistic
 mp_drawing_styles = mp.solutions.drawing_styles
+
+# plot
+plt.autoscale(False)
+fig = plt.figure()
+ax = fig.add_subplot(projection='3d')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+
 
 def display_tracked_image(image, results):
     """Source: Google Media Pipe Github Examples."""
@@ -80,6 +90,19 @@ with mp_holistic.Holistic( static_image_mode = static_image_mode,
 
         display_tracked_image(frame, holistic_results)
         
+        # visualize landmarks
+        if holistic_results.pose_world_landmarks:
         
+            ax.clear()
+            ax.set_xlim([-1, 1])
+            ax.set_ylim([-1, 1])
+            ax.set_zlim([-1, 1])
+
+            for landmark in holistic_results.pose_world_landmarks.landmark:
+                ax.scatter(landmark.x, landmark.y, landmark.z)
+        
+            plt.pause(0.01)
+
+
 feed.release()
 
