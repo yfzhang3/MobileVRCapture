@@ -137,7 +137,7 @@ def pose_call_back(result: PoseLandmarkerResult, output_image: mp.Image, timesta
         
         # draw the pose
         joints = [0, 20, 22, 16, 14, 12, 24, 26, 28, 32, 30, 29, 27, 31, 25, 23, 11, 13, 15, 21, 19]
-        draw_points(output_image, pose_landmarks, joints)
+        #draw_points(output_image, pose_landmarks, joints)
         
         # wrist, thumb, index
         left_hand = [pose_landmarks[15], pose_landmarks[21], pose_landmarks[19]] 
@@ -158,7 +158,7 @@ def pose_call_back(result: PoseLandmarkerResult, output_image: mp.Image, timesta
                 
                 # view hand landmarks
                 if hand_landmarker_left_result.hand_landmarks:
-                    draw_points(mp.Image(image_format=output_image.image_format, data=mp_np_image), hand_landmarker_left_result.hand_landmarks[0])
+                    # draw_points(mp.Image(image_format=output_image.image_format, data=mp_np_image), hand_landmarker_left_result.hand_landmarks[0])
                 
                     hand_world_landmarks = hand_landmarker_left_result.hand_world_landmarks[0]
                     
@@ -184,7 +184,7 @@ def pose_call_back(result: PoseLandmarkerResult, output_image: mp.Image, timesta
                 hand_landmarker_right_result = landmarker.detect(right_hand_image)
                 
                 if hand_landmarker_right_result.hand_landmarks:
-                    draw_points(mp.Image(image_format=output_image.image_format, data=mp_np_image), hand_landmarker_right_result.hand_landmarks[0])
+                    # draw_points(mp.Image(image_format=output_image.image_format, data=mp_np_image), hand_landmarker_right_result.hand_landmarks[0])
                 
                     hand_world_landmarks = hand_landmarker_right_result.hand_world_landmarks[0]
                     
