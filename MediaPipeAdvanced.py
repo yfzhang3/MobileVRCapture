@@ -132,18 +132,23 @@ def pose_call_back(result: PoseLandmarkerResult, output_image: mp.Image, timesta
         # draw the pose
         # joints = [0, 20, 22, 16, 14, 12, 24, 26, 28, 32, 30, 29, 27, 31, 25, 23, 11, 13, 15, 21, 19]
         # draw_points(output_image, pose_landmarks, joints)
-        
+        right_hand, left_hand = 'F', 'F'
+
         # wrist, thumb, index
         left_hand = [pose_landmarks[15], pose_landmarks[21], pose_landmarks[19]] 
         right_hand = [pose_landmarks[16], pose_landmarks[22], pose_landmarks[20]]
         
-        left_hand_image = find_hand_sub_image(left_hand, output_image)
-        right_hand_image = find_hand_sub_image(right_hand, output_image)
+        left_hand_image = None # find_hand_sub_image(left_hand, output_image)
+        right_hand_image = None # find_hand_sub_image(right_hand, output_image)
         
         # less hand markers
         subset = [0, 4, 5, 9, 13, 17, 8, 12, 16, 20]
 
         with HandLandmarker.create_from_options(hand_options) as landmarker:
+            
+            left_hand = 'F'
+            right_hand = 'F'
+            
             if left_hand_image:
                 
                 # detection algorithm on left hand
@@ -176,11 +181,11 @@ def pose_call_back(result: PoseLandmarkerResult, output_image: mp.Image, timesta
                     # transform parameters
                     a, b = find_ab(wrist_left, thumb_left, wrist_left_prime, thumb_left_prime)
                     pose_world_hand_coordinates = transform_hand_to_pose(hand_world_landmarks, a, b)
-                    # print(f'are the global coordinates equal? {wrist_left} == {pose_world_hand_coordinates[0]}')
 
                     # final output
                     left_hand_unity_format = unity_array(pose_world_hand_coordinates)
                     pose_unity_format += left_hand_unity_format
+                    left_hand = 'T'
                 
             if right_hand_image:
                 hand_landmarker_right_result = landmarker.detect(right_hand_image)
@@ -211,9 +216,9 @@ def pose_call_back(result: PoseLandmarkerResult, output_image: mp.Image, timesta
                     # final output
                     right_hand_unity_format = unity_array(pose_world_hand_coordinates)
                     pose_unity_format += right_hand_unity_format
+                    right_hand = 'T'
 
-        # send to unity via socket
-        sock.sendto(str.encode(pose_unity_format), serverAddressPort)
+        sock.sendto(str.encode(left_hand + right_hand + pose_unity_format), serverAddressPort)
 
 
 # -- MODEL OPTIONS -- 
@@ -233,6 +238,8 @@ with PoseLandmarker.create_from_options(pose_options) as landmarker:
   
   while feed.isOpened():
         successful, frame = feed.read()
+        
+        cv2.imshow('Webcam', frame)
 
         if cv2.waitKey(10) & 0xFF == ord('q'):
             break
