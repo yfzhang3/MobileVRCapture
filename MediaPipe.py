@@ -1,5 +1,6 @@
 import cv2
 import mediapipe as mp
+import socket
 import matplotlib.pyplot as plt
 
 
@@ -19,6 +20,9 @@ min_tracking_confidence = 0.5 # tracking confidence
 mp_drawing, mp_holistic = mp.solutions.drawing_utils, mp.solutions.holistic
 mp_drawing_styles = mp.solutions.drawing_styles
 
+# communication
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+serverAddressPort = ("127.0.0.1", 5052) # 5052 random port that's unused
 # plot
 plt.autoscale(False)
 fig = plt.figure()
@@ -80,6 +84,7 @@ with mp_holistic.Holistic( static_image_mode = static_image_mode,
         holistic_results = holistic.process(rgb_frame)
 
         display_tracked_image(frame, holistic_results)
+
         
         # visualize landmarks
         if holistic_results.pose_world_landmarks:
