@@ -23,13 +23,13 @@ public class PoseTracking : MonoBehaviour
             bodyData.Add(location);
         }
 
-        for (int y = 0; y < leftHandPoints.Length; y++)
+        for (int y = 0; y < 21; y++)
         {
             Vector3 location = leftHandPoints[y].transform.localPosition;
             leftHandData.Add(location);
         }
 
-        for (int y = 0; y < rightHandPoints.Length; y++)
+        for (int y = 0; y < 21; y++)
         {
             Vector3 location = rightHandPoints[y].transform.localPosition;
             rightHandData.Add(location);
@@ -58,11 +58,11 @@ public class PoseTracking : MonoBehaviour
             
             bodyData[i] = endingPosition;
         }  
-        print("finish body")
-        
+        print("finish body");
+
         // Update left hand points
         int startIndex = 21; // Start index for left hand data in the points array
-        for (int i = 0; i < leftHandPoints.Length; i++)
+        for (int i = 0; i < 21; i++)
         {
             float x = float.Parse(points[startIndex + i * 3]) * -5;
             float y = float.Parse(points[startIndex + i * 3 + 1]) * -5;
@@ -74,11 +74,11 @@ public class PoseTracking : MonoBehaviour
 
             leftHandData[i] = endingPosition;
         }
-        print("finish left hand")
+        print("finish left hand");
 
         // Update right hand points
-        startIndex = 21 + leftHandPoints.Length * 3; // Start index for right hand data in the points array
-        for (int i = 0; i < rightHandPoints.Length; i++)
+        startIndex = 21 + 21 * 3; // Start index for right hand data in the points array
+        for (int i = 0; i < 21; i++)
         {
             float x = float.Parse(points[startIndex + i * 3]) * -5;
             float y = float.Parse(points[startIndex + i * 3 + 1]) * -5;
@@ -90,6 +90,7 @@ public class PoseTracking : MonoBehaviour
 
             rightHandData[i] = endingPosition;
         }
-        print("finish right hand")
+        print("finish right hand");
     }
 }
+
