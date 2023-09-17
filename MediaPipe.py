@@ -33,15 +33,6 @@ def display_tracked_image(image, results):
     
     image.flags.writeable = True
     
-    """
-    mp_drawing.draw_landmarks(
-        image,
-        results.face_landmarks,
-        mp_holistic.FACEMESH_CONTOURS,
-        connection_drawing_spec=mp_drawing_styles
-        .get_default_face_mesh_contours_style())
-    """
-    
     mp_drawing.draw_landmarks(
         image,
         results.pose_landmarks,
