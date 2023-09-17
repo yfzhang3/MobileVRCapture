@@ -141,7 +141,7 @@ def pose_call_back(result: PoseLandmarkerResult, output_image: mp.Image, timesta
         right_hand_image = find_hand_sub_image(right_hand, output_image)
         
         # less hand markers
-        subset = [0, 4, 5, 9, 13, 17]
+        subset = [0, 4, 5, 9, 13, 17, 8, 12, 16, 20]
 
         with HandLandmarker.create_from_options(hand_options) as landmarker:
             if left_hand_image:
@@ -176,7 +176,7 @@ def pose_call_back(result: PoseLandmarkerResult, output_image: mp.Image, timesta
                     # transform parameters
                     a, b = find_ab(wrist_left, thumb_left, wrist_left_prime, thumb_left_prime)
                     pose_world_hand_coordinates = transform_hand_to_pose(hand_world_landmarks, a, b)
-                    print(f'are the global coordinates equal? {wrist_left} == {pose_world_hand_coordinates[0]}')
+                    # print(f'are the global coordinates equal? {wrist_left} == {pose_world_hand_coordinates[0]}')
 
                     # final output
                     left_hand_unity_format = unity_array(pose_world_hand_coordinates)
@@ -195,14 +195,14 @@ def pose_call_back(result: PoseLandmarkerResult, output_image: mp.Image, timesta
                     hand_world_landmarks = [hand_world_landmarks[i] for i in subset]
                     
                     # wrist and thumb in pose world coordinates
-                    wrist_right = [pose_world[16].x, pose_world[16].y, pose_world[16].z]
-                    thumb_right = [pose_world[22].x, pose_world[22].y, pose_world[22].z]
+                    wrist_right = np.array([pose_world[16].x, pose_world[16].y, pose_world[16].z])
+                    thumb_right = np.array([pose_world[22].x, pose_world[22].y, pose_world[22].z])
                     
                     # wrist and thumb in hand world coordinates
                     wrist_right_prime = hand_world_landmarks[0]
-                    wrist_right_prime = [wrist_right_prime.x, wrist_right_prime.y, wrist_right_prime.z]
+                    wrist_right_prime = np.array([wrist_right_prime.x, wrist_right_prime.y, wrist_right_prime.z])
                     thumb_right_prime = hand_world_landmarks[4]
-                    thumb_right_prime = [thumb_right_prime.x, thumb_right_prime.y, thumb_right_prime.z]
+                    thumb_right_prime = np.array([thumb_right_prime.x, thumb_right_prime.y, thumb_right_prime.z])
                     
                     # transform parameters
                     a, b = find_ab(wrist_right, thumb_right, wrist_right_prime, thumb_right_prime)
