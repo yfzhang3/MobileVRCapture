@@ -9,12 +9,11 @@ import socket
 image_queue = Queue()
 
 # -- WEBCAM -- 
-CAM_INDEX = 1
+CAM_INDEX = 0
 feed = cv2.VideoCapture(CAM_INDEX)
 fps = feed.get(cv2.CAP_PROP_FPS)
 timestep = int(1000 / fps)
 frame_timestamp_ms = 0
-
 
 # -- GENERAL OPTIONS -- 
 BaseOptions = mp.tasks.BaseOptions
@@ -33,6 +32,9 @@ hand_model_path = 'hand_landmarker.task'
 HandLandmarker = mp.tasks.vision.HandLandmarker
 HandLandmarkerOptions = mp.tasks.vision.HandLandmarkerOptions
 
+# -- SOCKET --
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+serverAddressPort = ("127.0.0.1", 5052) # 5052 random port that's unused
 
 # -- UNITY SERVER SOCKET --
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -154,6 +156,7 @@ def pose_call_back(result: PoseLandmarkerResult, output_image: mp.Image, timesta
                 # view hand landmarks
                 if hand_landmarker_left_result.hand_landmarks:
                     # draw_points(mp.Image(image_format=output_image.image_format, data=mp_np_image), hand_landmarker_left_result.hand_landmarks[0])
+                    # draw_points(mp.Image(image_format=output_image.image_format, data=mp_np_image), hand_landmarker_left_result.hand_landmarks[0])
                 
                     hand_world_landmarks = hand_landmarker_left_result.hand_world_landmarks[0]
                     
@@ -183,6 +186,7 @@ def pose_call_back(result: PoseLandmarkerResult, output_image: mp.Image, timesta
                 hand_landmarker_right_result = landmarker.detect(right_hand_image)
                 
                 if hand_landmarker_right_result.hand_landmarks:
+                    # draw_points(mp.Image(image_format=output_image.image_format, data=mp_np_image), hand_landmarker_right_result.hand_landmarks[0])
                     # draw_points(mp.Image(image_format=output_image.image_format, data=mp_np_image), hand_landmarker_right_result.hand_landmarks[0])
                 
                     hand_world_landmarks = hand_landmarker_right_result.hand_world_landmarks[0]
