@@ -27,13 +27,13 @@ public class PoseTracking : MonoBehaviour
             bodyData.Add(location);
         }
 
-        for (int y = 0; y < 21; y++)
+        for (int y = 0; y < 10; y++)
         {
             Vector3 location = leftHandPoints[y].transform.localPosition;
             leftHandData.Add(location);
         }
 
-        for (int y = 0; y < 21; y++)
+        for (int y = 0; y < 10; y++)
         {
             Vector3 location = rightHandPoints[y].transform.localPosition;
             rightHandData.Add(location);
@@ -67,17 +67,6 @@ public class PoseTracking : MonoBehaviour
                 !float.TryParse(points[i * 3 + 1], out y) ||
                 !float.TryParse(points[i * 3 + 2], out z))
             {
-                Debug.LogError("Error parsing float values for body point " + i);
-                continue; // Skip this point and continue with the next one
-            }
-            x *= -5;
-            y *= -5;
-            z *= -5;
-            // float x = float.Parse(points[i * 3])*-5;
-            // float y = float.Parse(points[i * 3 + 1])*-5;
-            // float z = float.Parse(points[i * 3 + 2])*-5;
-
-            Vector3 endingPosition = new Vector3(x, y, z);
 
             bodyPoints[i].transform.localPosition = Vector3.Lerp(bodyData[i], endingPosition, elapsedTime/desiredDuration);
             
