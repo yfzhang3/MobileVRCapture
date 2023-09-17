@@ -2,15 +2,14 @@ import mediapipe as mp
 import numpy as np
 import math
 import cv2
-
+import socket
 
 # -- WEBCAM -- 
-CAM_INDEX = 1
+CAM_INDEX = 0
 feed = cv2.VideoCapture(CAM_INDEX)
 fps = feed.get(cv2.CAP_PROP_FPS)
 timestep = int(1000 / fps)
 frame_timestamp_ms = 0
-
 
 # -- GENERAL OPTIONS -- 
 BaseOptions = mp.tasks.BaseOptions
@@ -29,6 +28,9 @@ hand_model_path = 'hand_landmarker.task'
 HandLandmarker = mp.tasks.vision.HandLandmarker
 HandLandmarkerOptions = mp.tasks.vision.HandLandmarkerOptions
 
+# -- SOCKET --
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+serverAddressPort = ("127.0.0.1", 5052) # 5052 random port that's unused
 
 # -- UTILITY FUNCTIONS -- 
 def transform_hand_to_pose(landmarks, a, b):
@@ -98,6 +100,7 @@ def pose_call_back(result: PoseLandmarkerResult, output_image: mp.Image, timesta
         pose_world = result.pose_world_landmarks[0]
         pose_landmarks = result.pose_landmarks[0]
         pose_unity_format = unity_format_cords(pose_world)
+        sock.sendto(str.encode(pose_unity_format), serverAddressPort)
         
         # wrist, thumb, index
         left_hand = [pose_landmarks[15], pose_landmarks[21], pose_landmarks[19]] 
