@@ -13,6 +13,10 @@ public class PoseTracking : MonoBehaviour
     private float desiredDuration = 3f;
     private float elapsedTime;
 
+    // Debug.Log("rightHandData.Count: " + rightHandData.Count);
+    // Debug.Log("rightHandPoints.Length: " + rightHandPoints.Length);
+
+
     List<Vector3> bodyData = new List<Vector3>();
     List<Vector3> leftHandData = new List<Vector3>();
     List<Vector3> rightHandData = new List<Vector3>();
@@ -43,14 +47,35 @@ public class PoseTracking : MonoBehaviour
         elapsedTime += 5f; 
 
         string data = udpReceive.data;
+        Debug.Log("Received data: " + data);
         string[] points = data.Split(',');
+        Debug.Log("Number of points: " + points.Length);
+
+        // Check if the points array has the expected length
+        if (points.Length != 63) // Adjust the length as needed
+        {
+            Debug.LogError("Received data has an unexpected format. Expected 63 elements, but received " + points.Length + " elements.");
+            return; // Exit the method to prevent further processing
+        }
 
         // Update body points
-        for (int i = 0; i<21; i++)
+        for (int i = 0; i < bodyPoints.Length; i++)
         {
-            float x = float.Parse(points[i * 3])*-5;
-            float y = float.Parse(points[i * 3 + 1])*-5;
-            float z = float.Parse(points[i * 3 + 2])*-5;
+            // Attempt to parse the values, and handle any parsing errors
+            float x, y, z;
+            if (!float.TryParse(points[i * 3], out x) ||
+                !float.TryParse(points[i * 3 + 1], out y) ||
+                !float.TryParse(points[i * 3 + 2], out z))
+            {
+                Debug.LogError("Error parsing float values for body point " + i);
+                continue; // Skip this point and continue with the next one
+            }
+            x *= -5;
+            y *= -5;
+            z *= -5;
+            // float x = float.Parse(points[i * 3])*-5;
+            // float y = float.Parse(points[i * 3 + 1])*-5;
+            // float z = float.Parse(points[i * 3 + 2])*-5;
 
             Vector3 endingPosition = new Vector3(x, y, z);
 
@@ -61,8 +86,9 @@ public class PoseTracking : MonoBehaviour
         print("finish body");
 
         // Update left hand points
-        int startIndex = 21; // Start index for left hand data in the points array
-        for (int i = 0; i < 21; i++)
+        int startIndex = bodyPoints.Length; 
+        
+        for (int i = 0; i < leftHandPoints.Length; i++)
         {
             float x = float.Parse(points[startIndex + i * 3]) * -5;
             float y = float.Parse(points[startIndex + i * 3 + 1]) * -5;
@@ -75,10 +101,11 @@ public class PoseTracking : MonoBehaviour
             leftHandData[i] = endingPosition;
         }
         print("finish left hand");
+    }
 
         // Update right hand points
-        startIndex = 21 + 21 * 3; // Start index for right hand data in the points array
-        for (int i = 0; i < 21; i++)
+        startIndex = leftHandPoints.Length + bodyPoints.Length * 3; 
+        for (int i = 0; i < rightHandPoints.Length; i++)
         {
             float x = float.Parse(points[startIndex + i * 3]) * -5;
             float y = float.Parse(points[startIndex + i * 3 + 1]) * -5;
@@ -91,6 +118,6 @@ public class PoseTracking : MonoBehaviour
             rightHandData[i] = endingPosition;
         }
         print("finish right hand");
-    }
+
 }
 
