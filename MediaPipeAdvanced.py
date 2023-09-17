@@ -66,19 +66,13 @@ def transform_hand_to_pose(landmarks, a, b):
         pose_world_hand_landmarks.append(lm_new)
     return pose_world_hand_landmarks
 def find_ab(z1, z2, z1_prime, z2_prime):
-    # format z1: [x, y, z]
-    a_values = []
-    b_values = []
-    for i in range(3):
-        coord_z1 = z1[i]
-        coord_z2 = z2[i]
-        coord_z1_prime = z1_prime[i]
-        coord_z2_prime = z2_prime[i]
-        a = (coord_z2_prime - coord_z1_prime) / (coord_z2 - coord_z1)
-        b = coord_z1_prime - a * coord_z1
-        a_values.append(a)
-        b_values.append(b)
-    return a_values, b_values
+    # T: a * z1' + b = z1
+    # T: a * z2' + b = z2
+    # a (z1' - z2') = z1 - z2
+    # b = z2 - a * z2'
+    a = (z1 - z2) / (z1_prime - z2_prime)
+    b = z2 - a * z2_prime
+    return a, b
 def crop_image(image: mp.Image, min_x, max_x, min_y, max_y):
     """Crop the media pipe image to the given rectangular bounds."""
     image_np = image.numpy_view()
@@ -134,8 +128,8 @@ def pose_call_back(result: PoseLandmarkerResult, output_image: mp.Image, timesta
         pose_unity_format = unity_landmarks(pose_world)
         
         # draw the pose
-        joints = [0, 20, 22, 16, 14, 12, 24, 26, 28, 32, 30, 29, 27, 31, 25, 23, 11, 13, 15, 21, 19]
-        draw_points(output_image, pose_landmarks, joints)
+        # joints = [0, 20, 22, 16, 14, 12, 24, 26, 28, 32, 30, 29, 27, 31, 25, 23, 11, 13, 15, 21, 19]
+        # draw_points(output_image, pose_landmarks, joints)
         
         # wrist, thumb, index
         left_hand = [pose_landmarks[15], pose_landmarks[21], pose_landmarks[19]] 
@@ -143,6 +137,9 @@ def pose_call_back(result: PoseLandmarkerResult, output_image: mp.Image, timesta
         
         left_hand_image = find_hand_sub_image(left_hand, output_image)
         right_hand_image = find_hand_sub_image(right_hand, output_image)
+        
+        # less hand markers
+        subset = [0, 4, 5, 9, 13, 17]
 
         with HandLandmarker.create_from_options(hand_options) as landmarker:
             if left_hand_image:
@@ -156,24 +153,28 @@ def pose_call_back(result: PoseLandmarkerResult, output_image: mp.Image, timesta
                 
                 # view hand landmarks
                 if hand_landmarker_left_result.hand_landmarks:
-                    draw_points(mp.Image(image_format=output_image.image_format, data=mp_np_image), hand_landmarker_left_result.hand_landmarks[0])
+                    # draw_points(mp.Image(image_format=output_image.image_format, data=mp_np_image), hand_landmarker_left_result.hand_landmarks[0])
                 
                     hand_world_landmarks = hand_landmarker_left_result.hand_world_landmarks[0]
                     
+                    # look at less data
+                    hand_world_landmarks = [hand_world_landmarks[i] for i in subset]
+                    
                     # wrist and thumb in pose world coordinates
-                    wrist_left = [pose_world[15].x, pose_world[15].y, pose_world[15].z]
-                    thumb_left = [pose_world[21].x, pose_world[21].y, pose_world[21].z]
+                    wrist_left = np.array([pose_world[15].x, pose_world[15].y, pose_world[15].z])
+                    thumb_left = np.array([pose_world[21].x, pose_world[21].y, pose_world[21].z])
                     
                     # wrist and thumb in hand world coordinates
                     wrist_left_prime = hand_world_landmarks[0]
-                    wrist_left_prime = [wrist_left_prime.x, wrist_left_prime.y, wrist_left_prime.z]
+                    wrist_left_prime = np.array([wrist_left_prime.x, wrist_left_prime.y, wrist_left_prime.z])
                     thumb_left_prime = hand_world_landmarks[4]
-                    thumb_left_prime = [thumb_left_prime.x, thumb_left_prime.y, thumb_left_prime.z]
+                    thumb_left_prime = np.array([thumb_left_prime.x, thumb_left_prime.y, thumb_left_prime.z])
                     
                     # transform parameters
                     a, b = find_ab(wrist_left, thumb_left, wrist_left_prime, thumb_left_prime)
                     pose_world_hand_coordinates = transform_hand_to_pose(hand_world_landmarks, a, b)
-                    
+                    print(f'are the global coordinates equal? {wrist_left} == {pose_world_hand_coordinates[0]}')
+
                     # final output
                     left_hand_unity_format = unity_array(pose_world_hand_coordinates)
                     pose_unity_format += left_hand_unity_format
@@ -182,9 +183,12 @@ def pose_call_back(result: PoseLandmarkerResult, output_image: mp.Image, timesta
                 hand_landmarker_right_result = landmarker.detect(right_hand_image)
                 
                 if hand_landmarker_right_result.hand_landmarks:
-                    draw_points(mp.Image(image_format=output_image.image_format, data=mp_np_image), hand_landmarker_right_result.hand_landmarks[0])
+                    # draw_points(mp.Image(image_format=output_image.image_format, data=mp_np_image), hand_landmarker_right_result.hand_landmarks[0])
                 
                     hand_world_landmarks = hand_landmarker_right_result.hand_world_landmarks[0]
+                    
+                    # look at less data
+                    hand_world_landmarks = [hand_world_landmarks[i] for i in subset]
                     
                     # wrist and thumb in pose world coordinates
                     wrist_right = [pose_world[16].x, pose_world[16].y, pose_world[16].z]
